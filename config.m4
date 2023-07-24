@@ -82,13 +82,13 @@ if test "$PHP_GRPC" != "no"; then
     -L$GRPC_LIBDIR
   ])
 
-  PHP_SUBST(GRPC_SHARED_LIBADD)
-
   PHP_NEW_EXTENSION(grpc, src/batch.c src/byte_buffer.c src/call.c src/call_credentials.c src/channel.c \
     src/channel_credentials.c src/completion_queue.c src/timeval.c src/server.c \
     src/server_credentials.c php_grpc.c, $ext_shared, , -std=c11 -DGRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK=1)
-
+  PHP_SUBST(GRPC_SHARED_LIBADD)
   PHP_ADD_BUILD_DIR($ext_builddir/src, 1)
+  PHP_ADD_INCLUDE($ext_builddir)
+  PHP_ADD_INCLUDE($ext_builddir/src)
 fi
 
 if test "$PHP_COVERAGE" = "yes"; then
