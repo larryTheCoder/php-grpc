@@ -166,7 +166,7 @@ PHP_METHOD(Call, drainCompletionQueue) {
 /**
  * Start a batch of RPC actions.
  * @param array $array Array of actions to take
- * @return object Object with results of all actions
+ * @param callable $callback Object with results of all actions
  */
 PHP_METHOD(Call, startBatch) {
   php_grpc_ulong index;
@@ -187,9 +187,6 @@ PHP_METHOD(Call, startBatch) {
     }
   }
 
-  // Set the return value to null first.
-  ZVAL_NULL(return_value);
-
   zval *array;
   HashTable *array_hash;
   HashTable *status_hash;
@@ -199,29 +196,20 @@ PHP_METHOD(Call, startBatch) {
   zend_fcall_info_cache fcc;
   struct batch *batch = NULL;
 
-  /* "a" == 1 array */
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fcc) ==
+  /* "a" == 1 array, "f" == 1 callback */
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &array, &fci, &fcc) ==
       FAILURE) {
     zend_throw_exception(spl_ce_InvalidArgumentException,
-                         "startBatch expects an array and an optional callable",
+                         "startBatch expects an array and a callable",
                          1 TSRMLS_CC);
-    goto cleanup;
-  }
-
-  if (call->client_async && ZEND_NUM_ARGS() < 2) {
-    zend_throw_exception(spl_ce_InvalidArgumentException,
-                         "startBatch requires a callable argument when "
-                         "constructed with client_async=true", 1 TSRMLS_CC);
     goto cleanup;
   }
 
   batch = batch_new(call->wrapped);
 
-  if (ZEND_NUM_ARGS() > 1) {
-    Z_ADDREF(fci.function_name);
-    batch->fci = fci;
-    batch->fcc = fcc;
-  }
+  Z_ADDREF(fci.function_name);
+  batch->fci = fci;
+  batch->fcc = fcc;
 
   // c-core may call rand(). If we don't call srand() here, all the
   // random numbers being returned would be the same.
@@ -370,9 +358,29 @@ PHP_METHOD(Call, startBatch) {
   }
 
   if (!call->client_async) {
-    grpc_completion_queue_pluck(completion_queue, batch,
+    grpc_event event = grpc_completion_queue_pluck(completion_queue, batch,
                                 gpr_inf_future(GPR_CLOCK_REALTIME), NULL);
-    batch_consume(batch, return_value);
+
+    zval retval;
+    zval params[2];
+
+    if (event.success) {
+      ZVAL_NULL(&params[0]);
+      batch_consume(batch, &params[1]);
+      batch->fci.param_count = 2;
+    } else {
+      ZVAL_STRING(&params[0], "The async function encountered an error");
+      batch->fci.param_count = 1;
+    }
+    batch->fci.params = params;
+    batch->fci.retval = &retval;
+
+    zend_call_function(&batch->fci, &batch->fcc);
+
+    for (int i = 0; i < batch->fci.param_count; i++) {
+      zval_dtor(&params[i]);
+    }
+    zval_dtor(&retval);
   } else {
     pending_batches++;
     batch = NULL;
@@ -440,9 +448,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_construct, 0, 0, 3)
   ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_async, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_startBatch, 0, 1, IS_OBJECT, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_startBatch, 0, 2, IS_VOID, 0)
   ZEND_ARG_TYPE_INFO(0, ops, IS_ARRAY, 0)
-  ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
+  ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_drainCompletionQueue, 0, 1, _IS_BOOL, 0)

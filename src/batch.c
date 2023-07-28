@@ -216,12 +216,12 @@ void batch_consume(struct batch* batch, zval *result) {
       zval_ptr_dtor(recv_status);
       PHP_GRPC_DELREF(recv_status);
       PHP_GRPC_FREE_STD_ZVAL(recv_status);
-        break;
-      case GRPC_OP_RECV_CLOSE_ON_SERVER:
-        add_property_bool(result, "cancelled", batch->cancelled);
-        break;
-      default:
-        break;
+      break;
+    case GRPC_OP_RECV_CLOSE_ON_SERVER:
+      add_property_bool(result, "cancelled", batch->cancelled);
+      break;
+    default:
+      break;
     }
   }
 }
