@@ -41,7 +41,7 @@ void grpc_php_init_next_queue(TSRMLS_D) {
 
 bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
   grpc_event event;
-  zval params[2];
+  zval params[1];
   zval retval;
   if (draining_next_queue) {
     return true;
@@ -56,14 +56,13 @@ bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
       struct batch *batch = (struct batch*) event.tag;
 
       if (!shutdown) {
-        if (event.success) {
-          ZVAL_NULL(&params[0]);
-          batch_consume(batch, &params[1]);
-          batch->fci.param_count = 2;
+        if (event.success != 0) {
+          batch_consume(batch, &params[0]);
         } else {
-          ZVAL_STRING(&params[0], "The async function encountered an error");
-          batch->fci.param_count = 1;
+          ZVAL_NULL(&params[0]);
         }
+
+        batch->fci.param_count = 1;
         batch->fci.params = params;
         batch->fci.retval = &retval;
 
