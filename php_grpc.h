@@ -34,6 +34,7 @@
 
 #include "php7_wrapper.h"
 #include "version.h"
+#include "completion_queue.h"
 
 extern zend_module_entry grpc_module_entry;
 #define phpext_grpc_ptr &grpc_module_entry
@@ -67,6 +68,8 @@ PHP_MSHUTDOWN_FUNCTION(grpc);
 PHP_MINFO_FUNCTION(grpc);
 /* Code that runs at request start */
 PHP_RINIT_FUNCTION(grpc);
+/* Code that runs at request shutdown */
+PHP_RSHUTDOWN_FUNCTION(grpc);
 
 /*
   Declare any global variables you may need between the BEGIN
@@ -79,6 +82,10 @@ ZEND_BEGIN_MODULE_GLOBALS(grpc)
   char *grpc_verbosity;
   char *grpc_trace;
   char *log_filename;
+
+  // Since completion queue is a global variable, it would make sense if we
+  // initialize the object in the zend global variable.
+  struct completion_queue_storage storage;
 ZEND_END_MODULE_GLOBALS(grpc)
 
 ZEND_EXTERN_MODULE_GLOBALS(grpc);

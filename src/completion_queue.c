@@ -18,42 +18,38 @@
 
 #include "completion_queue.h"
 #include "batch.h"
-
-grpc_completion_queue *completion_queue;
-grpc_completion_queue *next_queue;
-int pending_batches;
-bool draining_next_queue;
+#include "php_grpc.h"
 
 void grpc_php_init_completion_queue(TSRMLS_D) {
-  completion_queue = grpc_completion_queue_create_for_pluck(NULL);
+  GRPC_G(storage).completion_queue = grpc_completion_queue_create_for_pluck(NULL);
 }
 
 void grpc_php_shutdown_completion_queue(TSRMLS_D) {
-  grpc_completion_queue_shutdown(completion_queue);
-  grpc_completion_queue_destroy(completion_queue);
+  grpc_completion_queue_shutdown(GRPC_G(storage).completion_queue);
+  grpc_completion_queue_destroy(GRPC_G(storage).completion_queue);
 }
 
 void grpc_php_init_next_queue(TSRMLS_D) {
-  next_queue = grpc_completion_queue_create_for_next(NULL);
-  pending_batches = 0;
-  draining_next_queue = false;
+  GRPC_G(storage).next_queue = grpc_completion_queue_create_for_next(NULL);
+  GRPC_G(storage).pending_batches = 0;
+  GRPC_G(storage).draining_next_queue = false;
 }
 
 bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
   grpc_event event;
   zval params[1];
   zval retval;
-  if (draining_next_queue) {
+  if (GRPC_G(storage).draining_next_queue) {
     return true;
   }
-  if (pending_batches == 0) {
+  if (GRPC_G(storage).pending_batches == 0) {
     return false;
   }
-  draining_next_queue = true;
+  GRPC_G(storage).draining_next_queue = true;
   do {
-    event = grpc_completion_queue_next(next_queue, deadline, NULL);
+    event = grpc_completion_queue_next(GRPC_G(storage).next_queue, deadline, NULL);
     if (event.type == GRPC_OP_COMPLETE) {
-      struct batch *batch = (struct batch*) event.tag;
+      struct batch *batch = (struct batch *) event.tag;
 
       if (!shutdown) {
         if (event.success != 0) {
@@ -75,19 +71,19 @@ bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
       }
 
       batch_destroy(batch);
-      pending_batches--;
-      if (pending_batches == 0) {
+      GRPC_G(storage).pending_batches--;
+      if (GRPC_G(storage).pending_batches == 0) {
         break;
       }
     }
   } while (event.type != GRPC_QUEUE_TIMEOUT);
-  draining_next_queue = false;
+  GRPC_G(storage).draining_next_queue = false;
 
-  return pending_batches > 0 ? true : false;
+  return GRPC_G(storage).pending_batches > 0 ? true : false;
 }
 
 void grpc_php_shutdown_next_queue(TSRMLS_D) {
   while (grpc_php_drain_next_queue(true, gpr_inf_future(GPR_CLOCK_MONOTONIC) TSRMLS_CC));
-  grpc_completion_queue_shutdown(next_queue);
-  grpc_completion_queue_destroy(next_queue);
+  grpc_completion_queue_shutdown(GRPC_G(storage).next_queue);
+  grpc_completion_queue_destroy(GRPC_G(storage).next_queue);
 }

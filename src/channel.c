@@ -553,10 +553,10 @@ PHP_METHOD(Channel, watchConnectivityState) {
     PHP_GRPC_GET_WRAPPED_OBJECT(wrapped_grpc_timeval, deadline_obj);
   grpc_channel_watch_connectivity_state(channel->wrapper->wrapped,
                                         (grpc_connectivity_state)last_state,
-                                        deadline->wrapped, completion_queue,
+                                        deadline->wrapped, GRPC_G(storage).completion_queue,
                                         NULL);
   grpc_event event =
-      grpc_completion_queue_pluck(completion_queue, NULL,
+      grpc_completion_queue_pluck(GRPC_G(storage).completion_queue, NULL,
                                   gpr_inf_future(GPR_CLOCK_REALTIME), NULL);
   gpr_mu_unlock(&channel->wrapper->mu);
   RETURN_BOOL(event.success);

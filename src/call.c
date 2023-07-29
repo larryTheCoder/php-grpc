@@ -132,7 +132,7 @@ PHP_METHOD(Call, __construct) {
   grpc_slice method_slice = grpc_slice_from_copied_string(method);
   grpc_slice host_slice = host_override != NULL ?
       grpc_slice_from_copied_string(host_override) : grpc_empty_slice();
-  queue = client_async ? next_queue : completion_queue;
+  queue = client_async ? GRPC_G(storage).next_queue : GRPC_G(storage).completion_queue;
   call->wrapped =
     grpc_channel_create_call(channel->wrapper->wrapped, NULL,
                              GRPC_PROPAGATE_DEFAULTS,
@@ -358,7 +358,7 @@ PHP_METHOD(Call, startBatch) {
   }
 
   if (!call->client_async) {
-    grpc_event event = grpc_completion_queue_pluck(completion_queue, batch,
+    grpc_event event = grpc_completion_queue_pluck(GRPC_G(storage).completion_queue, batch,
                                 gpr_inf_future(GPR_CLOCK_REALTIME), NULL);
 
     zval retval;
@@ -381,7 +381,7 @@ PHP_METHOD(Call, startBatch) {
     }
     zval_dtor(&retval);
   } else {
-    pending_batches++;
+    GRPC_G(storage).pending_batches++;
     batch = NULL;
   }
 

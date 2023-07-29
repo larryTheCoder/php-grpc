@@ -34,13 +34,15 @@
 #include "TSRM.h"
 #endif
 
-/* The global completion queue for all operations */
-extern grpc_completion_queue *completion_queue;
+struct completion_queue_storage {
+  /* The global completion queue for all operations */
+  grpc_completion_queue *completion_queue;
 
-/* The completion queue for client-async operations */
-extern grpc_completion_queue *next_queue;
-extern int pending_batches;
-extern bool draining_next_queue;
+  /* The completion queue for client-async operations */
+  grpc_completion_queue *next_queue;
+  int pending_batches;
+  bool draining_next_queue;
+};
 
 /* Initializes the completion queue */
 void grpc_php_init_completion_queue(TSRMLS_D);

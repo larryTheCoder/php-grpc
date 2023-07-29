@@ -42,9 +42,9 @@ PHP_GRPC_DECLARE_OBJECT_HANDLER(server_ce_handlers)
 /* Frees and destroys an instance of wrapped_grpc_server */
 PHP_GRPC_FREE_WRAPPED_FUNC_START(wrapped_grpc_server)
   if (p->wrapped != NULL) {
-    grpc_server_shutdown_and_notify(p->wrapped, completion_queue, NULL);
+    grpc_server_shutdown_and_notify(p->wrapped, GRPC_G(storage).completion_queue, NULL);
     grpc_server_cancel_all_calls(p->wrapped);
-    grpc_completion_queue_pluck(completion_queue, NULL,
+    grpc_completion_queue_pluck(GRPC_G(storage).completion_queue, NULL,
                                 gpr_inf_future(GPR_CLOCK_REALTIME), NULL);
     grpc_server_destroy(p->wrapped);
   }
@@ -87,7 +87,7 @@ PHP_METHOD(Server, __construct) {
     server->wrapped = grpc_server_create(&args, NULL);
     efree(args.args);
   }
-  grpc_server_register_completion_queue(server->wrapped, completion_queue,
+  grpc_server_register_completion_queue(server->wrapped, GRPC_G(storage).completion_queue,
                                         NULL);
 }
 
@@ -112,13 +112,13 @@ PHP_METHOD(Server, requestCall) {
   grpc_metadata_array_init(&metadata);
   error_code =
     grpc_server_request_call(server->wrapped, &call, &details, &metadata,
-                             completion_queue, completion_queue, NULL);
+                             GRPC_G(storage).completion_queue, GRPC_G(storage).completion_queue, NULL);
   if (error_code != GRPC_CALL_OK) {
     zend_throw_exception(spl_ce_LogicException, "request_call failed",
                          (long)error_code TSRMLS_CC);
     goto cleanup;
   }
-  event = grpc_completion_queue_pluck(completion_queue, NULL,
+  event = grpc_completion_queue_pluck(GRPC_G(storage).completion_queue, NULL,
                                       gpr_inf_future(GPR_CLOCK_REALTIME),
                                       NULL);
   if (!event.success) {
