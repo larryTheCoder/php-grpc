@@ -13,6 +13,7 @@
 #include <grpc/grpc.h>
 
 #include "byte_buffer.h"
+#include "call.h"
 
 /* Creates and returns a PHP array object with the data in a
  * grpc_metadata_array. Returns NULL on failure */
@@ -208,6 +209,7 @@ void batch_consume(struct batch* batch, zval *result) {
       PHP_GRPC_FREE_STD_ZVAL(recv_md);
       PHP_GRPC_DELREF(array);
       add_property_long(recv_status, "code", batch->status);
+      add_property_string(recv_status, "reason", grpc_status_code_to_string(batch->status));
       char *status_details_text = grpc_slice_to_c_string(batch->recv_status_details);
       php_grpc_add_property_string(recv_status, "details", status_details_text,
                                    true);

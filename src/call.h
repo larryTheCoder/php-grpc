@@ -40,6 +40,9 @@ static inline wrapped_grpc_call
                               XtOffsetOf(wrapped_grpc_call, std));
 }
 
+/* Parses a grpc status code into a human readable code format */
+const char* grpc_status_code_to_string(grpc_status_code status);
+
 /* Creates and returns a PHP associative array of metadata from a C array of
  * call metadata */
 zval *grpc_parse_metadata_array(grpc_metadata_array *metadata_array TSRMLS_DC);
