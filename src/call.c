@@ -402,15 +402,12 @@ PHP_METHOD(Call, startBatch) {
                                 gpr_inf_future(GPR_CLOCK_REALTIME), NULL);
 
     zval retval;
-    zval params[1];
+    zval params[2];
 
-    if (event.success != 0) {
-      batch_consume(batch, &params[0]);
-    } else {
-      ZVAL_NULL(&params[0]);
-    }
+    batch_consume(batch, &params[0]);
+    ZVAL_BOOL(&params[1], event.success == 1);
 
-    batch->fci.param_count = 1;
+    batch->fci.param_count = 2;
     batch->fci.params = params;
     batch->fci.retval = &retval;
 

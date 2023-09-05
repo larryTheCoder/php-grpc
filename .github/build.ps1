@@ -12,7 +12,7 @@ if (-not $?) {
     throw "building failed with errorlevel $LastExitCode"
 }
 
-Copy-Item "x64\Release_TS\php_grpc.dll" "E:\ACD-ANG-Production\bin\php\ext\php_grpc.dll"
+Copy-Item "x64\Release_TS\php_grpc.dll" "E:\ACD-ANG-Production-PM5\bin\php\ext\php_grpc.dll"
 
 Remove-Item config.nice.bat
 Remove-Item configure.bat

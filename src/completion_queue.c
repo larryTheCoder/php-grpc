@@ -37,7 +37,7 @@ void grpc_php_init_next_queue(TSRMLS_D) {
 
 bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
   grpc_event event;
-  zval params[1];
+  zval params[2];
   zval retval;
   if (GRPC_G(storage).draining_next_queue) {
     return true;
@@ -52,13 +52,10 @@ bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
       struct batch *batch = (struct batch *) event.tag;
 
       if (!shutdown) {
-        if (event.success != 0) {
-          batch_consume(batch, &params[0]);
-        } else {
-          ZVAL_NULL(&params[0]);
-        }
+        batch_consume(batch, &params[0]);
+        ZVAL_BOOL(&params[1], event.success == 1);
 
-        batch->fci.param_count = 1;
+        batch->fci.param_count = 2;
         batch->fci.params = params;
         batch->fci.retval = &retval;
 
