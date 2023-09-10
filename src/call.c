@@ -392,7 +392,7 @@ PHP_METHOD(Call, startBatch) {
   error = grpc_call_start_batch(call->wrapped, batch->ops, batch->op_num, batch,
                                 NULL);
   if (error != GRPC_CALL_OK) {
-    zend_throw_exception_ex(spl_ce_LogicException,(long)error, "grpc_call_start_batch failed with %s (code=%d)",
+    zend_throw_exception_ex(spl_ce_RuntimeException,(long)error, "grpc_call_start_batch failed with %s (code=%d)",
                             grpc_call_error_to_string(error), error TSRMLS_CC);
     goto cleanup;
   }
