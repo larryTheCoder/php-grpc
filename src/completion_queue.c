@@ -80,7 +80,7 @@ bool grpc_php_drain_next_queue(bool shutdown, gpr_timespec deadline TSRMLS_DC) {
 }
 
 void grpc_php_shutdown_next_queue(TSRMLS_D) {
-  while (grpc_php_drain_next_queue(true, gpr_inf_future(GPR_CLOCK_MONOTONIC) TSRMLS_CC));
+  //while (grpc_php_drain_next_queue(true, gpr_inf_future(GPR_CLOCK_MONOTONIC) TSRMLS_CC));
   grpc_completion_queue_shutdown(GRPC_G(storage).next_queue);
   grpc_completion_queue_destroy(GRPC_G(storage).next_queue);
 }
