@@ -7,6 +7,7 @@
 
 #include <php.h>
 #include <zend_API.h>
+#include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <stdbool.h>
 #include <grpc/support/alloc.h>
@@ -45,7 +46,7 @@ zval *grpc_parse_metadata_array(grpc_metadata_array
     if (php_grpc_zend_hash_find(array_hash, str_key, key_len, (void **)&data)
         == SUCCESS) {
       if (Z_TYPE_P(data) != IS_ARRAY) {
-        zend_throw_exception(zend_exception_get_default(TSRMLS_C),
+        zend_throw_exception(spl_ce_InvalidArgumentException,
                              "Metadata hash somehow contains wrong types.",
                              1 TSRMLS_CC);
         efree(str_key);
