@@ -3,13 +3,6 @@ ARG_ENABLE("grpc", "Enable grpc support", "yes");
 if (PHP_GRPC !== "no") {
     if (SETUP_OPENSSL("grpc", PHP_GRPC) &&
         CHECK_LIB("zlib_a.lib;zlib.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("grpc.lib", "grpc", PHP_GRPC) &&
-        CHECK_HEADER_ADD_INCLUDE("grpc/grpc.h", "CFLAGS_GRPC") &&
-        CHECK_LIB("cares.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("re2.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("address_sorting.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("gpr.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("upb.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_log_severity.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_raw_logging_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_spinlock_wait.lib", "grpc", PHP_GRPC) &&
@@ -18,6 +11,8 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_throw_delegate.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_scoped_set_env.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_strerror.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_poison.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_tracing_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_hashtablez_sampler.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_raw_hash_set.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_crc_cpu_detect.lib", "grpc", PHP_GRPC) &&
@@ -30,6 +25,9 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_failure_signal_handler.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_debugging_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_demangle_internal.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_decode_rust_punycode.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_demangle_rust.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_utf8_for_code_point.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_leak_check.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_program_name.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_config.lib", "grpc", PHP_GRPC) &&
@@ -39,7 +37,6 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_flags_private_handle_accessor.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_reflection.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_internal.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_flags.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_usage_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_usage.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_flags_parse.lib", "grpc", PHP_GRPC) &&
@@ -58,8 +55,10 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_log_flags.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_log_globals.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_log_initialize.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_log_entry.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_log_sink.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_log_internal_structured_proto.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_vlog_config_internal.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_log_internal_fnmatch.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_int128.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_exponential_biased.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_periodic_sampler.lib", "grpc", PHP_GRPC) &&
@@ -67,7 +66,7 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_random_seed_gen_exception.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_random_seed_sequences.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_random_internal_seed_material.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_random_internal_pool_urbg.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_random_internal_entropy_pool.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_random_internal_platform.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_random_internal_randen.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_random_internal_randen_slow.lib", "grpc", PHP_GRPC) &&
@@ -76,6 +75,7 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_random_internal_distribution_test_util.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_status.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_statusor.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_string_view.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_strings.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_strings_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_str_format_internal.lib", "grpc", PHP_GRPC) &&
@@ -86,13 +86,45 @@ if (PHP_GRPC !== "no") {
         CHECK_LIB("absl_cordz_sample_token.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_cord.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_graphcycles_internal.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("absl_kernel_timeout_internal.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_synchronization.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_time.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_civil_time.lib", "grpc", PHP_GRPC) &&
         CHECK_LIB("absl_time_zone.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_bad_any_cast_impl.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_bad_optional_access.lib", "grpc", PHP_GRPC) &&
-        CHECK_LIB("absl_bad_variant_access.lib", "grpc", PHP_GRPC)) {
+        CHECK_LIB("cares.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("cares.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libutf8_validity.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libutf8_range.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libprotobuf-lite.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libprotobuf.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libprotoc.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("libupb.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("re2.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("re2.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("address_sorting.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("gpr.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc_unsecure.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_base_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_hash_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_json_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_lex_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_mem_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_message_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_mini_descriptor_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_mini_table_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_reflection_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_textformat_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("upb_wire_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("utf8_range_lib.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc++.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc++_alts.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc++_error_details.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc++_reflection.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc++_unsecure.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc_authorization_provider.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpc_plugin_support.lib", "grpc", PHP_GRPC) &&
+        CHECK_LIB("grpcpp_channelz.lib", "grpc", PHP_GRPC)) {
 
         EXTENSION("grpc", "php_grpc.c", PHP_GRPC_SHARED, "/I" + configure_module_dirname + " /I" + configure_module_dirname + "/src");
 
@@ -102,4 +134,4 @@ if (PHP_GRPC !== "no") {
     } else {
         WARNING("php-grpc not enabled; libraries and headers not found");
     }
-} 
+}
